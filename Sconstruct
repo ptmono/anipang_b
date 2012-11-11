@@ -1,0 +1,79 @@
+import SCons.Util
+import SCons.Node.FS
+#from scons_csharp import add_version
+
+env = Environment(tools=['scons_csharp', 'msvs'])
+
+def add_version(target, source, env):
+    if env.has_key('VERSION'):
+        if SCons.Util.is_String(target[0]):
+            versionfile = target[0] + '_VersionInfo.cs'
+        else:
+            versionfile = target[0].name + '_VersionInfo.cs'
+        source.append(env.Command(versionfile, [Value(getVersionAsmDirective(*parseVersion(env)))], generateVersionId))
+    return (target, source)
+
+# MsCliLibBuilder can not use ASSEMBLYREFS. I couldn't understand why
+# author write that. MsCliLibBuilder will add /reference s.
+MsCliLibBuilder2 = SCons.Builder.Builder(action = '$CSCLIBCOM',
+                                        source_factory = SCons.Node.FS.default_fs.Entry,
+                                        emitter = add_version,
+                                        suffix = '$SHLIBSUFFIX')
+env['BUILDERS']['CLILibrary2'] = MsCliLibBuilder2
+
+# MsCLIProgram does not contains -lib option, but CLILibrary conatians
+# that. MsCLIProgram2 will contains -lib option.
+MsCliBuilder2 = SCons.Builder.Builder(action = '$CSCCOM2',
+                                        source_factory = SCons.Node.FS.default_fs.Entry,
+                                        emitter = add_version,
+                                        suffix = '$SHLIBSUFFIX')
+env['CSCCOM2']       = '$CSC $CSCFLAGS $_CSCFLAGS $_CSCLIBPATH -out:${TARGET.abspath} $_CSC_REFS $_CSC_MODS $_CSC_SOURCES'
+env['BUILDERS']['CLIProgram2'] = MsCliBuilder2
+
+
+refs = [
+    'System.dll',
+    'System.Windows.Forms.dll',
+    'System.Drawing.dll',
+    'System.Core.dll',
+    'mscorlib.dll',
+    #'C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\PublicAssemblies\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll',
+    #'c:/Program Files (x86)/NUnit 2.6.1/bin/framework/nunit.framework.dll'
+    ]
+
+# We have to separate the refs for dll. Why?
+refs_testing = [
+    #'C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\PublicAssemblies\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll',
+    #'c:/Program Files (x86)/NUnit 2.6.1/bin/framework/nunit.framework.dll'
+    #'nunit.framework.dll'
+    ]
+
+sources = ['cslibs.cs',
+           ]
+
+sources_crop = ['Crop/Area.cs',
+                'Crop/AreaManager.cs',
+                'Crop/Crop.cs',
+                'Crop/RectangleArea.cs',
+                'Crop/ResizeManager.cs',
+
+                'Crop/GDI.cs',
+                'Crop/GraphicsMgr.cs',
+                'Crop/NativeMethods.cs',
+                'Crop/Structures.cs',
+                'Crop/Capture.cs'
+                ]
+
+env['IPY'] = '"c:/Program Files (x86)/IronPython 2.7/ipy.exe"'
+env['PYC'] = '"c:/Program Files (x86)/IronPython 2.7/Tools/Scripts/pyc.py"'
+
+env.CLILibrary2("crop.dll", sources_crop, ASSEMBLYREFS=refs)
+env.CLILibrary2("cslibs.dll", sources, ASSEMBLYREFS=refs)
+
+
+
+exe = env.Command("exe", [], '$IPY $PYC /main:main.py /standalone')
+env.AlwaysBuild(exe)
+
+#env.CLILibrary('libsTest.cs', ASSEMBLYREFS=refs_testing)
+#env.CLIProgram(sources, ASSEMBLYREFS=refs)

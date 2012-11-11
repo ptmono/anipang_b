@@ -1,0 +1,11 @@
+* Refactoring
+
+Change the names and rebuild the objects.
+
+
+* algorithm
+
+I want other mathematical way. But there is some difficulty for tetris
+like algorithms.
+
+

@@ -1,0 +1,4 @@
+* rectangle problem
+
+AniImage object has a problem with rectangle argument. It doesn't work for
+main function. It seems the problem of AniImageBoard.
