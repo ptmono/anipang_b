@@ -1,4 +1,3 @@
-
 .. contents:: :local:
 
 
@@ -6,7 +5,6 @@ Purpose
 =======
 
 Anipng is a game similar to Bejeweled. Let's create an automatic gamer.
-
 
 Requirements
 ============
@@ -48,4 +46,8 @@ Using
 
  6. Double click or enter to start.
 
-[![ScreenCast](https://raw.github.com/GabLeRoux/WebMole/master/ressources/WebMole_Youtube_Video.png)](http://youtu.be/mvuCW67BycA)
+
+Video
+=====
+
+http://youtu.be/mvuCW67BycA
